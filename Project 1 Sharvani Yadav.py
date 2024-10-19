@@ -146,5 +146,26 @@ print("Classification Report for Test Set \n", classification_report(step_test,
                                                                      test_predictions, 
                                                                      zero_division=0))
 
+"Training Model 2 - RANDOM FOREST"
+
+rf_classifier = RandomForestClassifier()
+
+# Train the model
+rf_classifier.fit(coord_train, step_train)
+
+# Predictions on training data
+rf_train_predictions = rf_classifier.predict(coord_train)
+print("Classification Report for Training Set \n", classification_report(step_train, 
+                                                                         rf_train_predictions, 
+                                                                         zero_division=0))
+
+# Predictions on test data
+rf_test_predictions = rf_classifier.predict(coord_test)
+print("Classification Report for Test Set \n", classification_report(step_test, 
+                                                                     rf_test_predictions, 
+                                                                     zero_division=0))
+
+
+
 
  
