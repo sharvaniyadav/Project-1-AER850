@@ -33,7 +33,8 @@ from sklearn.metrics import confusion_matrix, classification_report, ConfusionMa
 # Load the dataset from a CSV file
 df = pd.read_csv('Project_1_Data.csv') 
 df = df.dropna()  # Remove rows with missing values  
-                                                      # Reads the data from a CSV file and stores it in a pandas DataFrame for manipulation.
+# Reads the data from a CSV file and stores it in a pandas DataFrame for manipulation.
+
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -52,6 +53,7 @@ ax.scatter(df['X'], df['Y'], df['Z'])                                           
 ax.view_init(42, 185)                                                                              # Set the view angle for better visibility (30 degrees elevation and 185 degrees azimuth).
 
 # Show the 3D scatter plot
+plt.title("3D Visualization of Data")
 plt.show()  # Display the plot.
 
 "This code creates 2D visualization Bar Graph of the data:"
@@ -144,6 +146,7 @@ it’s a good idea to apply scaling methods to improve the model's effectiveness
 
 correlation_matrix = coord_train.corr()                                        # Gathers the Correlation Matrix that will be later inputted
 sb.heatmap(np.abs(correlation_matrix))                                         # Creates Heatmap to visualize the correlation matrix itself
+plt.title("Heatmap of Correlation Matrix")
 
 ''' Based on the heatmap, the input variables don’t strongly correlate with 
 each other (the highest is around 0.2). This means none of the variables are 
@@ -170,6 +173,50 @@ print("Classification Report for Test Set \n", classification_report(step_test,
                                                                      test_predictions, 
                                                                      zero_division=0))
 
+# Define hyperparameter grid for Logistic Regression
+param_grid_lr = {
+    'C': [0.01, 0.1, 1, 10, 100],
+    'max_iter': [100, 250, 500, 1000],
+    'class_weight': ['balanced', None]
+}
+
+# Perform GridSearchCV for hyperparameter tuning
+grid_search_lr = GridSearchCV(estimator=log_reg_model, param_grid=param_grid_lr, cv=5, scoring='f1_weighted', n_jobs=1)
+grid_search_lr.fit(coord_train, step_train)
+
+# Retrieve the best hyperparameters from GridSearchCV
+best_params_lr = grid_search_lr.best_params_
+print("Best Hyperparameters for Logistic Regression:", best_params_lr)
+
+# Get the best model from GridSearchCV
+best_log_reg_model = grid_search_lr.best_estimator_
+
+# Predict on the test data using the best model
+log_reg_final_pred = best_log_reg_model.predict(coord_test)
+
+# Performance Analysis
+log_reg_accuracy_score = accuracy_score(step_test, log_reg_final_pred)
+log_reg_confusion_matrix = confusion_matrix(step_test, log_reg_final_pred)
+log_reg_classification_report = classification_report(step_test, log_reg_final_pred)
+
+print("Model 1 Performance Analysis: Logistic Regression\n")
+print("Accuracy Score:", log_reg_accuracy_score)
+print("\nConfusion Matrix:\n", log_reg_confusion_matrix)
+print("\nClassification Report:\n", log_reg_classification_report)
+
+# Display the confusion matrix
+disp_log_reg = ConfusionMatrixDisplay(confusion_matrix=log_reg_confusion_matrix)
+disp_log_reg.plot(cmap=plt.cm.Blues)
+plt.title("Confusion Matrix for Logistic Regression")
+plt.show()
+
+# Plot heatmap for confusion matrix
+sb.heatmap(log_reg_confusion_matrix)
+plt.title("Heatmap of Confusion Matrix for Logistic Regression")
+plt.show()
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
 "Training Model 2 - RANDOM FOREST"
 
 rf_model = RandomForestClassifier(random_state=42, 
@@ -180,7 +227,7 @@ rf_model = RandomForestClassifier(random_state=42,
                                        max_features='sqrt',
                                        class_weight='balanced')
 
-rf_model.fit(coord_train, step_train)                                                         # Train the model
+rf_model.fit(coord_train, step_train)                                                         # Train the model using the training data
 
 rf_train_predictions = rf_model.predict(coord_train)                                          # Predictions on training data
 print("Classification Report for Training Set \n", classification_report(step_train,          # Print the classification report for the training set
@@ -231,18 +278,86 @@ disp_rf.plot(cmap=plt.cm.Blues)
 plt.title("Confusion Matrix for Random Forests")
 plt.show()
 
+# Plot heatmap for confusion matrix
 sb.heatmap(confusion_matrix_rf)
+plt.title("Heatmap of Confusion Matrix for Random Forests")
 plt.show()
 
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+"Training Model 3 - SVM (Support Vector Machine)"
 
+svm_model = SVC(random_state=42,                                               # Initialize SVM model with class weight balanced
+                class_weight='balanced')
 
+svm_model.fit(coord_train, step_train)                                         # Train the model using the training data
 
+svm_pred_train = svm_model.predict(coord_train)                                # Predict on the training data and evaluate performance
+print("Classification Report for Train \n", classification_report(step_train, 
+                                                                  svm_pred_train, 
+                                                                  zero_division=0))
 
+svm_pred_test = svm_model.predict(coord_test)                                  # Predict on the test data and evaluate performance
+print("Classification Report for Test \n", classification_report(step_test, 
+                                                                 svm_pred_test, 
+                                                                 zero_division=0))
+# Define hyperparameter grid for SVM
+param_grid_svm = {
+    'C': [0.01, 0.1, 1, 10, 100],
+    'kernel': ['linear', 'poly', 'rbf'],
+    'max_iter': [100, 250, 500, 1000],
+    'class_weight': ['balanced', None]
+}
 
+# Perform GridSearchCV for Hyperparameter Tuning
+grid_search_svm = GridSearchCV(estimator=svm_model, param_grid=param_grid_svm, cv=5, scoring='f1_weighted', n_jobs=1)
+grid_search_svm.fit(coord_train, step_train)
 
+# Retrieve the Best Hyperparameters from GridSearchCV
+best_params_svm = grid_search_svm.best_params_
+print("Best Hyperparameters for SVM:", best_params_svm)
 
+# Get the Best Model from GridSearchCV
+best_svm_model = grid_search_svm.best_estimator_
 
+# Predict on the Test Data using the Best Model and Evaluate Performance
+svm_final_pred = best_svm_model.predict(coord_test)
+print("Classification Report After GridSearchCV for SVM \n", classification_report(step_test, 
+                                                                                   svm_final_pred, 
+                                                                                   zero_division=0))
+# Performance Analysis
+svm_accuracy_score = accuracy_score(step_test, svm_final_pred)
+svm_confusion_matrix = confusion_matrix(step_test, svm_final_pred)
+svm_classification_report = classification_report(step_test, svm_final_pred)
+
+print("Model 2 Performance Analysis: Support Vector Machine\n")
+print("Accuracy Score:", svm_accuracy_score)
+print("\nConfusion Matrix:\n", svm_confusion_matrix)
+print("\nClassification Report:\n", svm_classification_report)
+
+# Plot the Confusion Matrix
+svm_confusion_matrix = confusion_matrix(step_test, svm_final_pred)
+disp_svm = ConfusionMatrixDisplay(confusion_matrix=svm_confusion_matrix)
+disp_svm.plot(cmap=plt.cm.Blues)
+plt.title("Confusion Matrix for SVM")
+plt.show()
+
+# Plot heatmap for Confusion Matrix
+sb.heatmap(svm_confusion_matrix)
+plt.title("Heatmap of Confusion Matrix for SVM")
+plt.show()
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+"(2.6) STEP  6: Stacked Model Performance Analysis"
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+"(2.7) STEP  7: Model Evaluation"
+
+joblib.dump(final_model, 'chosen_model.joblib')
 
 
 
