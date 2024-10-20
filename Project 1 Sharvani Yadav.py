@@ -365,9 +365,9 @@ plt.show()
 
 print("\nConfusion Matrix:\n", svm_confusion_matrix)
 print("\nSummary:")
-print("\nAccuracy Score:", log_reg_accuracy_score)
-print("\nAccuracy Score:", accuracy_score_rf)
-print("\nAccuracy Score:", svm_accuracy_score)
+print("\nAccuracy Score for Logistic Regression:", log_reg_accuracy_score)
+print("\nAccuracy Score for Random Forest:", accuracy_score_rf)
+print("\nAccuracy Score SVM:", svm_accuracy_score)
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
