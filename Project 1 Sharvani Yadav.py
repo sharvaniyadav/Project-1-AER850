@@ -24,16 +24,17 @@ from sklearn.svm import SVC                                                     
 from sklearn.metrics import classification_report, confusion_matrix, accuracy_score                # These metrics help evaluate the performance of classification models.
 import joblib                                                                                      # Joblib is used to save and load models, making it easier to persist and reuse trained models.
 from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.ensemble import StackingClassifier
+from sklearn.model_selection import RandomizedSearchCV
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 "(2.1) STEP 1: Data Processing"
 
-# Load the dataset from a CSV file
 df = pd.read_csv('Project_1_Data.csv') 
-df = df.dropna()  # Remove rows with missing values  
-# Reads the data from a CSV file and stores it in a pandas DataFrame for manipulation.
+df = df.dropna()
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -56,12 +57,6 @@ ax.view_init(42, 185)                                                           
 plt.title("3D Visualization of Data")
 plt.show()  # Display the plot.
 
-"This code creates 2D visualization Bar Graph of the data:"
-'''This code analyzes and visualizes the distribution of the Step variable in your dataset. 
-It counts how many times each unique step appears, creates a bar graph to display these counts,
-and adds labels to explain the graph. The final output helps you understand how frequently 
-each step occurs, revealing trends or imbalances in your data.'''
- 
 # Count how many times each step appears
 step_count = df["Step"].value_counts()
 
@@ -72,9 +67,13 @@ step_count.plot(kind="bar")
 plt.title("Distribution of Steps of Inverter")
 plt.xlabel("Step")
 plt.ylabel("Number of Instances")
-
-# Show the graph
 plt.show()
+
+"This code creates 2D visualization Bar Graph of the data:"
+'''This code analyzes and visualizes the distribution of the Step variable in your dataset. 
+It counts how many times each unique step appears, creates a bar graph to display these counts,
+and adds labels to explain the graph. The final output helps understand how frequently 
+each step occurs, revealing trends or imbalances in data.'''
 
 '''Observations of Graph: 
 1. Imbalance in Data: 
@@ -144,9 +143,21 @@ it’s a good idea to apply scaling methods to improve the model's effectiveness
 
 "(2.3) STEP 3: Correlation Analysis"
 
-correlation_matrix = coord_train.corr()                                        # Gathers the Correlation Matrix that will be later inputted
-sb.heatmap(np.abs(correlation_matrix))                                         # Creates Heatmap to visualize the correlation matrix itself
-plt.title("Heatmap of Correlation Matrix")
+# Visualize the correlation matrix
+coord_train.corr()
+sb.heatmap(coord_train.corr().round(2), annot=True, cmap="magma")
+
+corr_x = step_train.corr(coord_train['X'])
+print(corr_x)
+
+corr_y = step_train.corr(coord_train['Y'])
+print(corr_y)
+
+corr_z = step_train.corr(coord_train['Z'])
+print(corr_z)
+
+plt.title("Heatmap of Correlation Matrix") 
+plt.show()
 
 ''' Based on the heatmap, the input variables don’t strongly correlate with 
 each other (the highest is around 0.2). This means none of the variables are 
@@ -157,19 +168,19 @@ too similar, so none of the data needs to be dropped from the dataset itself.'''
 
 "(2.4) STEP 4: Classification Model Development/Engineering"
 
-"Training Model 1 - LOGISTIC REGRESSION"
+"Model 1 - LOGISTIC REGRESSION"
 
-log_reg_model = LogisticRegression(C=0.01, class_weight='balanced', multi_class='ovr', random_state=42) 
+log_reg_model = LogisticRegression(C=0.01, class_weight='balanced', multi_class='ovr', random_state=42)
 log_reg_model.fit(coord_train, step_train)
 
 # Predictions on training data
 train_predictions = log_reg_model.predict(coord_train)
-print("Classification Report for Training Set \n", classification_report(step_train, 
+print("\nLogReg Classification Report for Training Set \n", classification_report(step_train, 
                                                                          train_predictions, 
                                                                          zero_division=0))
 # Predictions on test data
 test_predictions = log_reg_model.predict(coord_test)
-print("Classification Report for Test Set \n", classification_report(step_test, 
+print("\nLogReg Classification Report for Test Set \n", classification_report(step_test, 
                                                                      test_predictions, 
                                                                      zero_division=0))
 
@@ -186,7 +197,7 @@ grid_search_lr.fit(coord_train, step_train)
 
 # Retrieve the best hyperparameters from GridSearchCV
 best_params_lr = grid_search_lr.best_params_
-print("Best Hyperparameters for Logistic Regression:", best_params_lr)
+print("\nBest Hyperparameters for Logistic Regression Model:\n", best_params_lr)
 
 # Get the best model from GridSearchCV
 best_log_reg_model = grid_search_lr.best_estimator_
@@ -196,28 +207,15 @@ log_reg_final_pred = best_log_reg_model.predict(coord_test)
 
 # Performance Analysis
 log_reg_accuracy_score = accuracy_score(step_test, log_reg_final_pred)
-log_reg_confusion_matrix = confusion_matrix(step_test, log_reg_final_pred)
 log_reg_classification_report = classification_report(step_test, log_reg_final_pred)
 
-print("Model 1 Performance Analysis: Logistic Regression\n")
-print("Accuracy Score:", log_reg_accuracy_score)
-print("\nConfusion Matrix:\n", log_reg_confusion_matrix)
+print("\nModel Performance Analysis - Logistic Regression:")
+print("\nAccuracy Score:", log_reg_accuracy_score)
 print("\nClassification Report:\n", log_reg_classification_report)
-
-# Display the confusion matrix
-disp_log_reg = ConfusionMatrixDisplay(confusion_matrix=log_reg_confusion_matrix)
-disp_log_reg.plot(cmap=plt.cm.Blues)
-plt.title("Confusion Matrix for Logistic Regression")
-plt.show()
-
-# Plot heatmap for confusion matrix
-sb.heatmap(log_reg_confusion_matrix)
-plt.title("Heatmap of Confusion Matrix for Logistic Regression")
-plt.show()
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-"Training Model 2 - RANDOM FOREST"
+"Model 2 - RANDOM FOREST"
 
 rf_model = RandomForestClassifier(random_state=42, 
                                        max_depth=5, 
@@ -226,19 +224,20 @@ rf_model = RandomForestClassifier(random_state=42,
                                        n_estimators=10, 
                                        max_features='sqrt',
                                        class_weight='balanced')
+rf_model.fit(coord_train, step_train)                                                         
 
-rf_model.fit(coord_train, step_train)                                                         # Train the model using the training data
-
-rf_train_predictions = rf_model.predict(coord_train)                                          # Predictions on training data
-print("Classification Report for Training Set \n", classification_report(step_train,          # Print the classification report for the training set
+# Predictions on training data
+rf_train_predictions = rf_model.predict(coord_train)
+print("\nRandomForest Classification Report for Training Set \n", classification_report(step_train,         
                                                                          rf_train_predictions, 
                                                                          zero_division=0))
 
-rf_test_predictions = rf_model.predict(coord_test)                                            # Predictions on test data
-print("Classification Report for Test Set \n", classification_report(step_test,               # Print the classification report for the testing set
+# Predictions on test data
+rf_test_predictions = rf_model.predict(coord_test)                                            
+print("\nRandomForest Classification Report for Test Set \n", classification_report(step_test,  
                                                                      rf_test_predictions, 
-                                                                 zero_division=0))
-# Hyperparameter Grid for Tuning
+                                                                     zero_division=0))
+# Define hyperparameter grid for Random Forest
 param_grid_rf = {
      'n_estimators': [10, 30, 50],
      'max_depth': [None, 10, 20, 30],
@@ -247,45 +246,32 @@ param_grid_rf = {
      'max_features': ['sqrt', 'log2']
  }
 
-# Implement Grid Search for Hyperparameter Tuning
+# Perform GridSearchCV for hyperparameter tuning
 grid_search_rf = GridSearchCV(estimator=rf_model, param_grid=param_grid_rf, cv=5, scoring='f1_weighted', n_jobs=1)
 grid_search_rf.fit(coord_train, step_train)
 
-# Retrieve the best hyperparameters from the grid search
+# Retrieve the best hyperparameters from GridSearchCV
 best_params_rf = grid_search_rf.best_params_
-print("Best Hyperparameters for Random Forest Model:", best_params_rf)
+print("\nBest Hyperparameters for Random Forest Model:\n", best_params_rf)
 
 # Get the best model from grid search
 best_rf_model = grid_search_rf.best_estimator_
 
-# Make predictions with the best model on the test set
+# Predict on the test data using the best model
 final_predictions = best_rf_model.predict(coord_test)
-
 
 # Performance Analysis
 accuracy_score_rf = accuracy_score(step_test, final_predictions)
-confusion_matrix_rf = confusion_matrix(step_test, final_predictions)
 classification_report_rf = classification_report(step_test, final_predictions)
 
 # Print accuracy score and classification report
-print("Model Performance Analysis: Random Forest\n")
-print("Accuracy Score:", accuracy_score_rf)
+print("\nModel Performance Analysis - Random Forest\n")
+print("\nAccuracy Score:", accuracy_score_rf)
 print("\nClassification Report:\n", classification_report_rf)
-
-# Plot the confusion matrix
-disp_rf = ConfusionMatrixDisplay(confusion_matrix=confusion_matrix_rf)
-disp_rf.plot(cmap=plt.cm.Blues)
-plt.title("Confusion Matrix for Random Forests")
-plt.show()
-
-# Plot heatmap for confusion matrix
-sb.heatmap(confusion_matrix_rf)
-plt.title("Heatmap of Confusion Matrix for Random Forests")
-plt.show()
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-"Training Model 3 - SVM (Support Vector Machine)"
+"Model 3 - SVM (Support Vector Machine)"
 
 svm_model = SVC(random_state=42,                                               # Initialize SVM model with class weight balanced
                 class_weight='balanced')
@@ -293,19 +279,18 @@ svm_model = SVC(random_state=42,                                               #
 svm_model.fit(coord_train, step_train)                                         # Train the model using the training data
 
 svm_pred_train = svm_model.predict(coord_train)                                # Predict on the training data and evaluate performance
-print("Classification Report for Train \n", classification_report(step_train, 
+print("\nSVM Classification Report for Training Set \n", classification_report(step_train, 
                                                                   svm_pred_train, 
                                                                   zero_division=0))
 
 svm_pred_test = svm_model.predict(coord_test)                                  # Predict on the test data and evaluate performance
-print("Classification Report for Test \n", classification_report(step_test, 
+print("\nSWM Classification Report for Test Set \n", classification_report(step_test, 
                                                                  svm_pred_test, 
                                                                  zero_division=0))
 # Define hyperparameter grid for SVM
 param_grid_svm = {
     'C': [0.01, 0.1, 1, 10, 100],
     'kernel': ['linear', 'poly', 'rbf'],
-    'max_iter': [100, 250, 500, 1000],
     'class_weight': ['balanced', None]
 }
 
@@ -315,25 +300,61 @@ grid_search_svm.fit(coord_train, step_train)
 
 # Retrieve the Best Hyperparameters from GridSearchCV
 best_params_svm = grid_search_svm.best_params_
-print("Best Hyperparameters for SVM:", best_params_svm)
+print("\nBest Hyperparameters for SVM Model:\n", best_params_svm)
 
 # Get the Best Model from GridSearchCV
 best_svm_model = grid_search_svm.best_estimator_
 
 # Predict on the Test Data using the Best Model and Evaluate Performance
 svm_final_pred = best_svm_model.predict(coord_test)
-print("Classification Report After GridSearchCV for SVM \n", classification_report(step_test, 
-                                                                                   svm_final_pred, 
-                                                                                   zero_division=0))
+print("\nClassification for SVM \n", classification_report(step_test, 
+                                                         svm_final_pred, 
+                                                         zero_division=0))
+
 # Performance Analysis
 svm_accuracy_score = accuracy_score(step_test, svm_final_pred)
 svm_confusion_matrix = confusion_matrix(step_test, svm_final_pred)
 svm_classification_report = classification_report(step_test, svm_final_pred)
 
-print("Model 2 Performance Analysis: Support Vector Machine\n")
-print("Accuracy Score:", svm_accuracy_score)
-print("\nConfusion Matrix:\n", svm_confusion_matrix)
+print("\nModel Performance Analysis - Support Vector Machine\n")
+print("\nAccuracy Score:", svm_accuracy_score)
 print("\nClassification Report:\n", svm_classification_report)
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+"Model 4 - Decision Tree"
+
+decision_tree_model = DecisionTreeClassifier(random_state=42)
+decision_tree_model.fit(coord_train, step_train)
+decision_tree_predictions = decision_tree_model.predict(coord_test)
+
+param_grid_dt = {
+    'max_depth': [None, 10, 20, 30],
+    'min_samples_split': [2, 5, 10],
+    'min_samples_leaf': [1, 2, 4]
+}
+
+random_search_dt = RandomizedSearchCV(decision_tree_model, param_grid_dt, cv=5, scoring='f1_weighted', n_jobs=1)
+random_search_dt.fit(coord_train, step_train)
+best_params_dt = random_search_dt.best_params_
+best_dt_model = random_search_dt.best_estimator_
+
+# Use the best model for predictions
+decision_tree_predictions = best_dt_model.predict(coord_test)
+
+# Performance Analysis
+decision_tree_accuracy = accuracy_score(step_test, decision_tree_predictions)
+decision_tree_classification_report = classification_report(step_test, decision_tree_predictions)
+
+print("\nModel 4 Performance Analysis: Decision Tree - Randomized Search")
+print("\nBest Hyperparameters:", best_params_dt)
+print("\nAccuracy Score:", decision_tree_accuracy)
+print("\nClassification Report:\n", decision_tree_classification_report)
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+"(2.5) STEP 5: Model Performance Analysis"
 
 # Plot the Confusion Matrix
 svm_confusion_matrix = confusion_matrix(step_test, svm_final_pred)
@@ -342,22 +363,84 @@ disp_svm.plot(cmap=plt.cm.Blues)
 plt.title("Confusion Matrix for SVM")
 plt.show()
 
-# Plot heatmap for Confusion Matrix
-sb.heatmap(svm_confusion_matrix)
-plt.title("Heatmap of Confusion Matrix for SVM")
-plt.show()
+print("\nConfusion Matrix:\n", svm_confusion_matrix)
+print("\nSummary:")
+print("\nAccuracy Score:", log_reg_accuracy_score)
+print("\nAccuracy Score:", accuracy_score_rf)
+print("\nAccuracy Score:", svm_accuracy_score)
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 "(2.6) STEP  6: Stacked Model Performance Analysis"
 
+# Combining the Models
+combined_model = [('SVM', best_svm_model), ('RandomForest', best_rf_model)]
+
+# Defining the Final Model
+final_model = LogisticRegression(max_iter=500)
+
+# Creating the Stacking Classifier
+stacked_model = StackingClassifier(estimators=combined_model, final_estimator=final_model, cv=5)
+stacked_model.fit(coord_train, step_train) 
+
+# Predicting with the Stacked Model
+stacked_model_pred = stacked_model.predict(coord_test)  
+
+# Evaluating the Performance
+stacked_model_accuracy_score = accuracy_score(step_test, stacked_model_pred)  
+stacked_model_confusion_matrix = confusion_matrix(step_test, stacked_model_pred)
+stacked_model_classification_report = classification_report(step_test, stacked_model_pred)
+
+# Plot the Confusion Matrix
+stacked_confusion_matrix = confusion_matrix(step_test, stacked_model_pred)
+disp_stacked = ConfusionMatrixDisplay(confusion_matrix=stacked_confusion_matrix)
+disp_stacked.plot(cmap=plt.cm.Blues)
+plt.title("StackingClassifier Confusion Matrix")
+plt.show()
+
+# Printing the Performance Analysis
+print("\nStacked Model Performance Analysis")
+print("\nAccuracy Score:", stacked_model_accuracy_score)
+print("\nConfusion Matrix:\n", stacked_model_confusion_matrix)
+print("\nClassification Report:\n", stacked_model_classification_report)
+
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 "(2.7) STEP  7: Model Evaluation"
 
-joblib.dump(final_model, 'chosen_model.joblib')
+# Save the best Random Forest Model
+joblib.dump(best_rf_model, 'best_rf_model.joblib')
+
+# Load the saved Random Forest Model
+loaded_rf_model = joblib.load('best_rf_model.joblib')
+
+# Coordinates for prediction
+coordinates_to_predict = pd.DataFrame([[9.375, 3.0625, 1.51],
+                                       [6.995, 5.125, 0.3875],
+                                       [0, 3.0625, 1.93],
+                                       [9.4, 3, 1.8],
+                                       [9.4, 3, 1.3]],
+                                      columns=['X', 'Y', 'Z'])
+
+# Scale the prediction data
+scaled_data = coord_scaler.transform(coordinates_to_predict)
+
+# Ensure the scaled data has the same feature names as the training data
+dataframe_scaled = pd.DataFrame(scaled_data, columns=coord_train.columns)
+
+# Predict using the loaded model
+predictions = loaded_rf_model.predict(dataframe_scaled)
+
+print("Predicted Step for Sample Coordinates:\n")
+print(predictions)
+    
+
+
+
+
+
 
 
 
