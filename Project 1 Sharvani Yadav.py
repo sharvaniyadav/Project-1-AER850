@@ -174,16 +174,12 @@ too similar, so none of the data needs to be dropped from the dataset itself.'''
 log_reg_model = LogisticRegression(C=0.01, class_weight='balanced', multi_class='ovr', random_state=42)
 log_reg_model.fit(coord_train, step_train)
 
-# Predictions on training data
+'''# Predictions on training data
 train_predictions = log_reg_model.predict(coord_train)
-print("\nLogReg Classification Report for Training Set \n", classification_report(step_train, 
-                                                                         train_predictions, 
-                                                                         zero_division=0))
+print("\nLogReg Classification Report for Training Set \n", classification_report(step_train, train_predictions, zero_division=0))
 # Predictions on test data
 test_predictions = log_reg_model.predict(coord_test)
-print("\nLogReg Classification Report for Test Set \n", classification_report(step_test, 
-                                                                     test_predictions, 
-                                                                     zero_division=0))
+print("\nLogReg Classification Report for Test Set \n", classification_report(step_test, test_predictions, zero_division=0))'''
 
 # Define hyperparameter grid for Logistic Regression
 param_grid_lr = {
@@ -214,7 +210,7 @@ log_reg_classification_report = classification_report(step_test, log_reg_final_p
 print("\nModel Performance Analysis - Logistic Regression:")
 print("\nAccuracy Score:", log_reg_accuracy_score)
 print("\nf1 Accuracy Score:", log_reg_f1_score)
-print("\nClassification Report:\n", log_reg_classification_report)
+print("\nLogisitc Regression Classification Report:\n", log_reg_classification_report)
 
 # Additional Accuracy Check for Training Set (LogReg)
 log_reg_train_pred = best_log_reg_model.predict(coord_train)
@@ -225,6 +221,8 @@ print(f"Logistic Regression Training Accuracy: {train_accuracy_lr:.4f}")
 log_reg_test_pred = best_log_reg_model.predict(coord_test)
 test_accuracy_lr = accuracy_score(step_test, log_reg_test_pred)
 print(f"Logistic Regression Testing Accuracy: {test_accuracy_lr:.4f}")
+print("\n---------------------------------------------------------------------------------------\n")
+
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 "Model 2 - RANDOM FOREST"
@@ -240,15 +238,14 @@ rf_model.fit(coord_train, step_train)
 
 # Predictions on training data
 rf_train_predictions = rf_model.predict(coord_train)
-print("\nRandomForest Classification Report for Training Set \n", classification_report(step_train,         
-                                                                         rf_train_predictions, 
-                                                                         zero_division=0))
-
+#print("\nRandomForest Classification Report for Training Set \n", classification_report(step_train,         
+                                                                        # rf_train_predictions, 
+                                                                         #zero_division=0))
 # Predictions on test data
 rf_test_predictions = rf_model.predict(coord_test)                                            
-print("\nRandomForest Classification Report for Test Set \n", classification_report(step_test,  
-                                                                     rf_test_predictions, 
-                                                                     zero_division=0))
+#print("\nRandomForest Classification Report for Test Set \n", classification_report(step_test,  
+                                                                  #   rf_test_predictions, 
+                                                                 #    zero_division=0))'''
 # Define hyperparameter grid for Random Forest
 param_grid_rf = {
      'n_estimators': [10, 30, 50],
@@ -281,7 +278,7 @@ classification_report_rf = classification_report(step_test, final_predictions)
 print("\nModel Performance Analysis - Random Forest\n")
 print("\nAccuracy Score:", accuracy_score_rf)
 print("\nf1 Accuracy Score:", rf_f1_score)
-print("\nClassification Report:\n", classification_report_rf)
+print("\nRandom Forest Classification Report:\n", classification_report_rf)
 
 # Additional Accuracy Check for Training Set (Random Forest)
 rf_train_pred = best_rf_model.predict(coord_train)
@@ -292,6 +289,8 @@ print(f"Random Forest Training Accuracy: {train_accuracy_rf:.4f}")
 rf_test_pred = best_rf_model.predict(coord_test)
 test_accuracy_rf = accuracy_score(step_test, rf_test_pred)
 print(f"Random Forest Testing Accuracy: {test_accuracy_rf:.4f}")
+print("\n---------------------------------------------------------------------------------------\n")
+
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 "Model 3 - SVM (Support Vector Machine)"
@@ -302,14 +301,14 @@ svm_model = SVC(random_state=42,                                               #
 svm_model.fit(coord_train, step_train)                                         # Train the model using the training data
 
 svm_pred_train = svm_model.predict(coord_train)                                # Predict on the training data and evaluate performance
-print("\nSVM Classification Report for Training Set \n", classification_report(step_train, 
-                                                                  svm_pred_train, 
-                                                                  zero_division=0))
+#print("\nSVM Classification Report for Training Set \n", classification_report(step_train, 
+                                                                #   svm_pred_train, 
+                                                                #  zero_division=0))
 
 svm_pred_test = svm_model.predict(coord_test)                                  # Predict on the test data and evaluate performance
-print("\nSWM Classification Report for Test Set \n", classification_report(step_test, 
-                                                                 svm_pred_test, 
-                                                                 zero_division=0))
+#print("\nSWM Classification Report for Test Set \n", classification_report(step_test, 
+                                                                # svm_pred_test, 
+                                                                # zero_division=0))
 # Define hyperparameter grid for SVM
 param_grid_svm = {
     'C': [0.01, 0.1, 1, 10, 100],
@@ -330,15 +329,12 @@ best_svm_model = grid_search_svm.best_estimator_
 
 # Predict on the Test Data using the Best Model and Evaluate Performance
 svm_final_pred = best_svm_model.predict(coord_test)
-print("\nClassification for SVM \n", classification_report(step_test, 
-                                                         svm_final_pred, 
-                                                         zero_division=0))
 
 # Performance Analysis
 svm_accuracy_score = accuracy_score(step_test, svm_final_pred)
 svm_f1_score = f1_score(step_test, svm_final_pred, average ='weighted')
 svm_confusion_matrix = confusion_matrix(step_test, svm_final_pred)
-svm_classification_report = classification_report(step_test, svm_final_pred)
+svm_classification_report = classification_report(step_test, svm_final_pred, zero_division=0)
 
 print("\nModel Performance Analysis - Support Vector Machine\n")
 print("\nAccuracy Score:", svm_accuracy_score)
@@ -354,6 +350,8 @@ print(f"Support Vector Machine Training Accuracy: {train_accuracy_svm:.4f}")
 svm_test_pred = best_svm_model.predict(coord_test)
 test_accuracy_svm = accuracy_score(step_test, svm_test_pred)
 print(f"Support Vector Machine Testing Accuracy: {test_accuracy_svm:.4f}")
+print("\n---------------------------------------------------------------------------------------\n")
+
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -410,11 +408,12 @@ disp_svm.plot(cmap=plt.cm.Blues)
 plt.title("Confusion Matrix for SVM")
 plt.show()
 
-print("\nConfusion Matrix:\n", svm_confusion_matrix)
+# print("\nConfusion Matrix:\n", svm_confusion_matrix)
 print("\nSummary:")
 print("\nAccuracy Score for Logistic Regression:", log_reg_accuracy_score)
 print("\nAccuracy Score for Random Forest:", accuracy_score_rf)
 print("\nAccuracy Score SVM:", svm_accuracy_score)
+print("\n---------------------------------------------------------------------------------------\n")
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -491,6 +490,7 @@ dataframe_scaled = pd.DataFrame(scaled_data, columns=coord_train.columns)
 # Predict using the loaded model
 predictions = loaded_rf_model.predict(dataframe_scaled)
 
+print("\n---------------------------------------------------------------------------------------\n")
 print("Predicted Step for Sample Coordinates:\n")
 print(predictions)
     
