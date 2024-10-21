@@ -408,7 +408,7 @@ print(f"Decision Tree Testing Accuracy: {test_accuracy_dt:.4f}")
 svm_confusion_matrix = confusion_matrix(step_test, svm_final_pred)
 disp_svm = ConfusionMatrixDisplay(confusion_matrix=svm_confusion_matrix)
 disp_svm.plot(cmap=plt.cm.Blues)
-plt.title("Confusion Matrix for SVM")
+plt.title("Confusion Matrix for DecTree")
 plt.show()
 
 # print("\nConfusion Matrix:\n", svm_confusion_matrix)
