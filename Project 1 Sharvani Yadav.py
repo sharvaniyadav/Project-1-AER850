@@ -21,12 +21,13 @@ from sklearn.model_selection import StratifiedShuffleSplit, GridSearchCV
 from sklearn.linear_model import LogisticRegression                                                # LogisticRegression is a classification algorithm used for binary/multiclass classification.
 from sklearn.ensemble import RandomForestClassifier                                                # RandomForestClassifier is an ensemble learning method based on decision trees.
 from sklearn.svm import SVC                                                                        # Support Vector Classifier (SVC) is a classification algorithm based on finding a decision boundary between classes.
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score                # These metrics help evaluate the performance of classification models.
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score      # These metrics help evaluate the performance of classification models.
 import joblib                                                                                      # Joblib is used to save and load models, making it easier to persist and reuse trained models.
 from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import StackingClassifier
 from sklearn.model_selection import RandomizedSearchCV
+
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -144,8 +145,8 @@ it’s a good idea to apply scaling methods to improve the model's effectiveness
 "(2.3) STEP 3: Correlation Analysis"
 
 # Visualize the correlation matrix
-coord_train.corr()
-sb.heatmap(coord_train.corr().round(2), annot=True, cmap="magma")
+df.corr()
+sb.heatmap(df.corr().round(2), annot=True, cmap="magma")
 
 corr_x = step_train.corr(coord_train['X'])
 print(corr_x)
@@ -207,10 +208,12 @@ log_reg_final_pred = best_log_reg_model.predict(coord_test)
 
 # Performance Analysis
 log_reg_accuracy_score = accuracy_score(step_test, log_reg_final_pred)
+log_reg_f1_score = f1_score(step_test, log_reg_final_pred, average ='weighted')
 log_reg_classification_report = classification_report(step_test, log_reg_final_pred)
 
 print("\nModel Performance Analysis - Logistic Regression:")
 print("\nAccuracy Score:", log_reg_accuracy_score)
+print("\nf1 Accuracy Score:", log_reg_f1_score)
 print("\nClassification Report:\n", log_reg_classification_report)
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -262,11 +265,13 @@ final_predictions = best_rf_model.predict(coord_test)
 
 # Performance Analysis
 accuracy_score_rf = accuracy_score(step_test, final_predictions)
+rf_f1_score = f1_score(step_test, final_predictions, average ='weighted')
 classification_report_rf = classification_report(step_test, final_predictions)
 
 # Print accuracy score and classification report
 print("\nModel Performance Analysis - Random Forest\n")
 print("\nAccuracy Score:", accuracy_score_rf)
+print("\nf1 Accuracy Score:", rf_f1_score)
 print("\nClassification Report:\n", classification_report_rf)
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -313,11 +318,13 @@ print("\nClassification for SVM \n", classification_report(step_test,
 
 # Performance Analysis
 svm_accuracy_score = accuracy_score(step_test, svm_final_pred)
+svm_f1_score = f1_score(step_test, svm_final_pred, average ='weighted')
 svm_confusion_matrix = confusion_matrix(step_test, svm_final_pred)
 svm_classification_report = classification_report(step_test, svm_final_pred)
 
 print("\nModel Performance Analysis - Support Vector Machine\n")
 print("\nAccuracy Score:", svm_accuracy_score)
+print("\nf1 Accuracy Score:", svm_f1_score)
 print("\nClassification Report:\n", svm_classification_report)
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -345,10 +352,12 @@ decision_tree_predictions = best_dt_model.predict(coord_test)
 # Performance Analysis
 decision_tree_accuracy = accuracy_score(step_test, decision_tree_predictions)
 decision_tree_classification_report = classification_report(step_test, decision_tree_predictions)
+dt_f1_score = f1_score(step_test, decision_tree_predictions, average ='weighted')
 
 print("\nModel 4 Performance Analysis: Decision Tree - Randomized Search")
 print("\nBest Hyperparameters:", best_params_dt)
 print("\nAccuracy Score:", decision_tree_accuracy)
+print("\nf1 Accuracy Score:", dt_f1_score)
 print("\nClassification Report:\n", decision_tree_classification_report)
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
