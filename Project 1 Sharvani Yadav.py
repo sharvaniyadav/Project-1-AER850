@@ -145,8 +145,8 @@ it’s a good idea to apply scaling methods to improve the model's effectiveness
 "(2.3) STEP 3: Correlation Analysis"
 
 # Visualize the correlation matrix
-df.corr()
-sb.heatmap(df.corr().round(2), annot=True, cmap="magma")
+coord_train.corr()
+sb.heatmap(coord_train.corr().round(2), annot=True, cmap="magma")
 
 corr_x = step_train.corr(coord_train['X'])
 print(corr_x)
@@ -194,6 +194,7 @@ grid_search_lr.fit(coord_train, step_train)
 
 # Retrieve the best hyperparameters from GridSearchCV
 best_params_lr = grid_search_lr.best_params_
+print("\nLOGISTIC REGRESSION:")
 print("\nBest Hyperparameters for Logistic Regression Model:\n", best_params_lr)
 
 # Get the best model from GridSearchCV
@@ -261,6 +262,7 @@ grid_search_rf.fit(coord_train, step_train)
 
 # Retrieve the best hyperparameters from GridSearchCV
 best_params_rf = grid_search_rf.best_params_
+print("\nRANDOM FOREST:")
 print("\nBest Hyperparameters for Random Forest Model:\n", best_params_rf)
 
 # Get the best model from grid search
@@ -322,6 +324,7 @@ grid_search_svm.fit(coord_train, step_train)
 
 # Retrieve the Best Hyperparameters from GridSearchCV
 best_params_svm = grid_search_svm.best_params_
+print("\nSVM:")
 print("\nBest Hyperparameters for SVM Model:\n", best_params_svm)
 
 # Get the Best Model from GridSearchCV
@@ -336,7 +339,7 @@ svm_f1_score = f1_score(step_test, svm_final_pred, average ='weighted')
 svm_confusion_matrix = confusion_matrix(step_test, svm_final_pred)
 svm_classification_report = classification_report(step_test, svm_final_pred, zero_division=0)
 
-print("\nModel Performance Analysis - Support Vector Machine\n")
+print("\nModel Performance Analysis - Support Vector Machine: ")
 print("\nAccuracy Score:", svm_accuracy_score)
 print("\nf1 Accuracy Score:", svm_f1_score)
 print("\nClassification Report:\n", svm_classification_report)
@@ -446,7 +449,7 @@ stacked_model_classification_report = classification_report(step_test, stacked_m
 stacked_confusion_matrix = confusion_matrix(step_test, stacked_model_pred)
 disp_stacked = ConfusionMatrixDisplay(confusion_matrix=stacked_confusion_matrix)
 disp_stacked.plot(cmap=plt.cm.Blues)
-plt.title("StackingClassifier Confusion Matrix")
+plt.title("Stacking Classifier Confusion Matrix")
 plt.show()
 
 # Printing the Performance Analysis
@@ -460,7 +463,6 @@ print("\nClassification Report:\n", stacked_model_classification_report)
 print("\nStacked f1 Score:", stacked_f1_score)
 print("\nStacked Precision Score:", stacked_f1_score)
 print("\nStacked Accuracy Score:", stacked_f1_score)
-print("\n")
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
