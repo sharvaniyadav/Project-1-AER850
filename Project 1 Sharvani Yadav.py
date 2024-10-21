@@ -21,7 +21,7 @@ from sklearn.model_selection import StratifiedShuffleSplit, GridSearchCV
 from sklearn.linear_model import LogisticRegression                                                # LogisticRegression is a classification algorithm used for binary/multiclass classification.
 from sklearn.ensemble import RandomForestClassifier                                                # RandomForestClassifier is an ensemble learning method based on decision trees.
 from sklearn.svm import SVC                                                                        # Support Vector Classifier (SVC) is a classification algorithm based on finding a decision boundary between classes.
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, f1_score      # These metrics help evaluate the performance of classification models.
+from sklearn.metrics import classification_report, confusion_matrix, precision_score, accuracy_score, f1_score      # These metrics help evaluate the performance of classification models.
 import joblib                                                                                      # Joblib is used to save and load models, making it easier to persist and reuse trained models.
 from sklearn.metrics import confusion_matrix, classification_report, ConfusionMatrixDisplay
 from sklearn.tree import DecisionTreeClassifier
@@ -216,6 +216,15 @@ print("\nAccuracy Score:", log_reg_accuracy_score)
 print("\nf1 Accuracy Score:", log_reg_f1_score)
 print("\nClassification Report:\n", log_reg_classification_report)
 
+# Additional Accuracy Check for Training Set (LogReg)
+log_reg_train_pred = best_log_reg_model.predict(coord_train)
+train_accuracy_lr = accuracy_score(step_train, log_reg_train_pred)
+print(f"Logistic Regression Training Accuracy: {train_accuracy_lr:.4f}")
+
+# Accuracy Check for Test Set (LogReg)
+log_reg_test_pred = best_log_reg_model.predict(coord_test)
+test_accuracy_lr = accuracy_score(step_test, log_reg_test_pred)
+print(f"Logistic Regression Testing Accuracy: {test_accuracy_lr:.4f}")
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 "Model 2 - RANDOM FOREST"
@@ -274,6 +283,15 @@ print("\nAccuracy Score:", accuracy_score_rf)
 print("\nf1 Accuracy Score:", rf_f1_score)
 print("\nClassification Report:\n", classification_report_rf)
 
+# Additional Accuracy Check for Training Set (Random Forest)
+rf_train_pred = best_rf_model.predict(coord_train)
+train_accuracy_rf = accuracy_score(step_train, rf_train_pred)
+print(f"Random Forest Training Accuracy: {train_accuracy_rf:.4f}")
+
+# Accuracy Check for Test Set (Random Forest)
+rf_test_pred = best_rf_model.predict(coord_test)
+test_accuracy_rf = accuracy_score(step_test, rf_test_pred)
+print(f"Random Forest Testing Accuracy: {test_accuracy_rf:.4f}")
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 "Model 3 - SVM (Support Vector Machine)"
@@ -327,6 +345,16 @@ print("\nAccuracy Score:", svm_accuracy_score)
 print("\nf1 Accuracy Score:", svm_f1_score)
 print("\nClassification Report:\n", svm_classification_report)
 
+# Additional Accuracy Check for Training Set (Support Vector Machine)
+svm_train_pred = best_svm_model.predict(coord_train)
+train_accuracy_svm = accuracy_score(step_train, svm_train_pred)
+print(f"Support Vector Machine Training Accuracy: {train_accuracy_svm:.4f}")
+
+# Accuracy Check for Test Set (Support Vector Machine)
+svm_test_pred = best_svm_model.predict(coord_test)
+test_accuracy_svm = accuracy_score(step_test, svm_test_pred)
+print(f"Support Vector Machine Testing Accuracy: {test_accuracy_svm:.4f}")
+
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 "Model 4 - Decision Tree"
@@ -359,6 +387,16 @@ print("\nBest Hyperparameters:", best_params_dt)
 print("\nAccuracy Score:", decision_tree_accuracy)
 print("\nf1 Accuracy Score:", dt_f1_score)
 print("\nClassification Report:\n", decision_tree_classification_report)
+
+# Additional Accuracy Check for Training Set (Decision Tree)
+dt_train_pred = best_dt_model.predict(coord_train)
+train_accuracy_dt = accuracy_score(step_train, dt_train_pred)
+print(f"Decision Tree Training Accuracy: {train_accuracy_dt:.4f}")
+
+# Accuracy Check for Test Set (Decision Tree)
+dt_test_pred = best_dt_model.predict(coord_test)
+test_accuracy_dt = accuracy_score(step_test, dt_test_pred)
+print(f"Decision Tree Testing Accuracy: {test_accuracy_dt:.4f}")
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -398,7 +436,10 @@ stacked_model_pred = stacked_model.predict(coord_test)
 
 # Evaluating the Performance
 stacked_model_accuracy_score = accuracy_score(step_test, stacked_model_pred) 
-stacked_f1_score = f1_score(step_test, stacked_model_pred, average ='weighted') 
+stacked_f1_score = f1_score(step_test, stacked_model_pred, average ='weighted')
+precision = precision_score(step_test, stacked_model_pred, average='weighted')
+accuracy = accuracy_score(step_test, stacked_model_pred)
+
 stacked_model_confusion_matrix = confusion_matrix(step_test, stacked_model_pred)
 stacked_model_classification_report = classification_report(step_test, stacked_model_pred)
 
@@ -413,8 +454,14 @@ plt.show()
 print("\nStacked Model Performance Analysis")
 print("\nAccuracy Score:", stacked_model_accuracy_score)
 print("\nf1 Accuracy Score:", stacked_f1_score)
+
 print("\nConfusion Matrix:\n", stacked_model_confusion_matrix)
 print("\nClassification Report:\n", stacked_model_classification_report)
+
+print("\nStacked f1 Score:", stacked_f1_score)
+print("\nStacked Precision Score:", stacked_f1_score)
+print("\nStacked Accuracy Score:", stacked_f1_score)
+print("\n")
 
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
