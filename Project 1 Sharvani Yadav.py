@@ -397,7 +397,8 @@ stacked_model.fit(coord_train, step_train)
 stacked_model_pred = stacked_model.predict(coord_test)  
 
 # Evaluating the Performance
-stacked_model_accuracy_score = accuracy_score(step_test, stacked_model_pred)  
+stacked_model_accuracy_score = accuracy_score(step_test, stacked_model_pred) 
+stacked_f1_score = f1_score(step_test, stacked_model_pred, average ='weighted') 
 stacked_model_confusion_matrix = confusion_matrix(step_test, stacked_model_pred)
 stacked_model_classification_report = classification_report(step_test, stacked_model_pred)
 
@@ -411,6 +412,7 @@ plt.show()
 # Printing the Performance Analysis
 print("\nStacked Model Performance Analysis")
 print("\nAccuracy Score:", stacked_model_accuracy_score)
+print("\nf1 Accuracy Score:", stacked_f1_score)
 print("\nConfusion Matrix:\n", stacked_model_confusion_matrix)
 print("\nClassification Report:\n", stacked_model_classification_report)
 
